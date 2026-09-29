@@ -13,41 +13,48 @@ def save_state(state):
 
 def load_state(text):
     state = json.loads(text)
-    state["id"] += 1
     return state
 
 
 def add(state, item_id, amount):
+    if item_id in state["items"]:
+        return False
     state["items"][item_id] = amount
     state["stock"] -= amount
     return True
 
 
 def receive(state, item_id):
+    if state["load"] >= state["capacity"]:
+        return False
     state["load"] += 1
     return True
 
 
 def fee(state, item_id, end_day):
-    return (end_day - state["day"]) - 1
+    return end_day - state["day"]
 
 
 def cancel(state, item_id):
+    if item_id not in state["items"]:
+        return False
+    state["stock"] += state["items"].pop(item_id)
     return True
 
 
 def produce(state, amount):
+    if state.get("fault"):
+        return False
     return True
 
 
 def event(state):
     state["metric"] -= 10
-    state["metric"] -= 10
     return state["metric"]
 
 
 def guard(state, item_id):
-    return True
+    return state.get("resource", 0) > 0
 
 
 def main():
